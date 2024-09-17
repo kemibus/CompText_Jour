@@ -12,8 +12,9 @@ This class exercise is a companion to the following chapter in Computational Tex
 
 #1: load tidyverse, rio and janitor libraries
 ```{r}
-
-
+library(tidyverse)
+library(rio)
+library(janitor)
 ```
 
 
@@ -21,51 +22,69 @@ This class exercise is a companion to the following chapter in Computational Tex
 
 https://github.com/wellsdata/CompText_Jour/raw/main/data/mob_analysis_data.csv
 ```{r}
-
+Mob<-read.csv("https://github.com/wellsdata/CompText_Jour/raw/main/data/mob_analysis_data.csv")
 ```
 
 #3: Provide dimensions: Gives number rows, then columns
 
 ```{r}
+dim(Mob)
+nrow(Mob)
+ncol(Mob)
 ```
 
 #4: Show names of your columns
 
 ```{r}
+colnames(Mob)
 
 ```
 
 #5: Check data types
 
 ```{r}
-
+str(Mob)
 ```
 
 #6: Display the first six rows
 
 ```{r}
-
+head(Mob)
 ```
 
 
 #7: Create a table counting the number of entries by year and display the top 5 results
 
 ```{r}
-
-
+Yeartable <- Mob %>%
+  group_by(Year) %>%
+  summarise(
+    count_tracts = n()
+  )
+head(Yeartable, n = 5)
 ```
 
 #8: Create a table that counts the different entries in the "keyword" column
 
 ```{r}
-
-
+KeywordTable <- Mob %>%
+  group_by(keyword) %>%
+  summarise(
+    count_tracts = n()
+  )
 ```
-
 
 #9: Create a simple column ggplot chart that shows the total entries by year
 
 ```{r}
+ggplot(Yeartable , aes(x = Year, y = count_tracts)) +
+geom_col(fill = "steelblue") +
+  labs(title = "mob", x = "Year", y = "Total Entries") +
+  theme_minimal()
+```
+
+
+
 
 ```
 
