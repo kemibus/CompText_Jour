@@ -67,21 +67,9 @@ count(year) %>%
   geom_col(position = "dodge")+
 labs(title = "Total entries by year",
        subtitle = "Data from 1850 to 2002",
-       caption = "Graphic by Kemi")
+       caption = "Graphics by Kemi")
 ```
 
 
-
-
-library(dplyr)
-library(ggplot2)
-  data %>%
-  group_by(year) %>%
-count(year) %>%
-  ggplot(aes(x=year, y=n, fill=n))+
-  geom_col(position = "dodge")+
-labs(title = "TOTAL ENTRIES BY YEAR",
-       subtitle = "DATA FROM 1850 TO 2002",
-       caption = "Graphic by Taufiq Ahmad"
 
 
