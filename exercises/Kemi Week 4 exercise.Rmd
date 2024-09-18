@@ -1,0 +1,87 @@
+---
+title: "Assignment 1 Kemi (week 4)"
+author: "Kemi"
+date: "2024-09-17"
+output: html_document
+---
+```{r}
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("rio")
+install.packages("readr")
+```
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(rio)
+library(readr)
+```
+
+
+```{r}
+#Load the data
+BlackIndex<-read.csv("https://raw.githubusercontent.com/wellsdata/CompText_Jour/main/data/blackindex_master.csv")
+```
+
+
+
+```{r}
+#describe the number of rows and columns in the dataset
+dim(BlackIndex)
+nrow(BlackIndex)
+ncol(BlackIndex)
+#The data has 1803 rows and 30 columns
+```
+```{r}
+#Create a table that displays a count of the top 15 newspaper_city entries
+BlackIndex_Top15<-(BlackIndex) %>%
+ count (newspaper_city) %>%
+ arrange(desc(newspaper_city)) %>%
+  slice_max(n, n=15)
+```
+
+```{r}
+#Create a table that counts the different entries in the "newspaper_city" column
+Entries_sum <- BlackIndex %>% 
+  group_by(year, newspaper_city) %>% 
+  summarise(count = n(), .groups = 'drop')
+```
+
+```{r}
+#Create a table that counts all newspaper_city entries by year
+Year_entries <- BlackIndex %>%
+count (newspaper_city, year, sort = TRUE, name = "Count") %>%
+  arrange(desc(Count))
+```
+
+```{r}
+#Create a simple column ggplot chart that shows the total entries by year
+library(dplyr)
+library(ggplot2)
+  BlackIndex %>%
+  group_by(year) %>%
+count(year) %>%
+  ggplot(aes(x=year, y=n, fill=n))+
+  geom_col(position = "dodge")+
+labs(title = "Total entries by year",
+       subtitle = "Data from 1850 to 2002",
+       caption = "Graphic by Kemi")
+```
+
+
+
+
+library(dplyr)
+library(ggplot2)
+  data %>%
+  group_by(year) %>%
+count(year) %>%
+  ggplot(aes(x=year, y=n, fill=n))+
+  geom_col(position = "dodge")+
+labs(title = "TOTAL ENTRIES BY YEAR",
+       subtitle = "DATA FROM 1850 TO 2002",
+       caption = "Graphic by Taufiq Ahmad"
+
+
