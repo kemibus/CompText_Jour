@@ -5,14 +5,7 @@ date: "2024-09-17"
 output: html_document
 ---
 ```{r}
-install.packages("tidyverse")
-install.packages("janitor")
-install.packages("rio")
-install.packages("readr")
-```
-
-
-```{r}
+#Load relevant software libraries
 library(tidyverse)
 library(janitor)
 library(rio)
@@ -26,20 +19,18 @@ BlackIndex<-read.csv("https://raw.githubusercontent.com/wellsdata/CompText_Jour/
 ```
 
 
-
 ```{r}
-#describe the number of rows and columns in the dataset
+#Describe the number of rows and columns in the dataset
 dim(BlackIndex)
 nrow(BlackIndex)
 ncol(BlackIndex)
-#The data has 1803 rows and 30 columns
 ```
 ```{r}
-#Create a table that displays a count of the top 15 newspaper_city entries
-BlackIndex_Top15<-(BlackIndex) %>%
+#Create a table that displays a count of the top 5 newspaper_city entries
+BlackIndex_Top5<-(BlackIndex) %>%
  count (newspaper_city) %>%
  arrange(desc(newspaper_city)) %>%
-  slice_max(n, n=15)
+  slice_max(n, n=5)
 ```
 
 ```{r}
@@ -52,18 +43,14 @@ Entries_sum <- BlackIndex %>%
 ```{r}
 #Create a table that counts all newspaper_city entries by year
 Year_entries <- BlackIndex %>%
+  filter(!is.na(newspaper_city))%>%
 count (newspaper_city, year, sort = TRUE, name = "Count") %>%
   arrange(desc(Count))
 ```
 
 ```{r}
 #Create a simple column ggplot chart that shows the total entries by year
-library(dplyr)
-library(ggplot2)
-  BlackIndex %>%
-  group_by(year) %>%
-count(year) %>%
-  ggplot(aes(x=year, y=n, fill=n))+
+  ggplot(Year_entries, aes(x=year, y=Count, fill= Count))+
   geom_col(position = "dodge")+
 labs(title = "Total entries by year",
        subtitle = "Data from 1850 to 2002",
