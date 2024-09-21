@@ -58,6 +58,12 @@ labs(title = "Total entries by year",
 ```
 
 #250 word memo
+The first challenge encountered was that the dataset was presented in its raw form, leading to incorrect output upon the initial run. Additionally, I observed a discrepancy between loading the data with read.csv and read_csv, with the latter returning fewer variables than the former. 
+The dataset also proved problematic, as more than 50% of the entries were marked as N/A. My initial assessment suggested that the data might not have been properly cleaned, or alternatively, that leaving the incomplete data could still provide valuable insights for the overall analysis. A closer examination revealed key omissions in fields such as article titles, newspaper names, and other critical variables.
+The filter command helped identify and filter out all the N/As but I’m still wondering why the code to filter out two or more variables doesn’t follow the same coding pattern. Perhaps we can go over this more in the class. 
+The ggplot, does an amazing job but I still would like to understand the mechanism behind it. Some questions I readily have about this are: how do I choose the exact graph or chart I want my data to be presented in? Can I switch between graphs and charts?
+Summarily, the dataset and the questions presented a good avenue to practice some of the major commands we’ve learned in class. I was able to perfect the use of basic commands such as “slice”, “group by” and “count.” 
+ 
 
 
 
