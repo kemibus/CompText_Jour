@@ -12,6 +12,8 @@ output: html_document
 
 ```{r}
 library(tidyverse)
+install.packages("here")
+libr
 here::i_am("Week8_Text_Compiler_Article_Filter_10_29.rmd")
 
 ```
@@ -46,7 +48,7 @@ files <- list.files("../exercises/assets/extracted_text", pattern="*.txt") %>%
 final_index <- final_data |> 
   inner_join(files, c("index")) |> 
 #you need the actual hard-coded path on this line below to the text
-  mutate(filepath = paste0("/Users/robwells/Code/CompText_Jour/exercises/assets/extracted_text/", filename))
+  mutate(filepath = paste0("/~/GitHub/CompText_Jour/exercises/assets/extracted_text", filename))
 
 head(final_index)
 ```
@@ -95,7 +97,7 @@ row_values <- 1:nrow(final_index)
 # This loops through each row of the dataframe and append results to master file
 ###
 
-lapply(row_values, create_article_text)
+#apply(row_values, create_article_text)
 
 ###
 # Clean up articles_df and join to index dataframe
