@@ -1,0 +1,129 @@
+---
+title: "WEEK 8 ASSIGNMENT"
+author: "Kemi"
+date: "2024-10-15"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+install.packages("tidytext")
+library(tidytext)
+library(janitor)
+install.packages("rio")
+library(rio)
+install.packages("textdata")
+library(textdata)
+install.packages("dplyr")
+library(dplyr)
+library(stringr)
+library(readr)
+```
+```{r}
+China_FDI <- read.csv("https://raw.githubusercontent.com/wellsdata/CompText_Jour/refs/heads/main/data/ChinaFDI-LAT_tidy.csv")
+```
+
+```{r}
+#Use code to count the number of unique articles in the dataset
+install.packages("dplyr")
+library(dplyr)
+Distinct_China <- China_FDI %>%
+  distinct(article_nmbr)%>%
+  count()
+```
+
+
+```{r}
+#Remove useless metadata
+# Define the patterns to filter out
+Remove_Meta <- c("Title", "Pages", "Publication date", "Publication subject","ISSN", "Language of publication: English", "Document URL", "Copyright", "Last updated", "Database", "STARTOFARTICLE", "ProQuest document ID","Classification", "https", "--", "People", "Publication info", "Illustration Caption", "Identifier /keyword", "Twitter", "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
+
+# Filter the rows where the 'text' column does NOT start with any of the specified patterns
+Remove_MetaChina <- China_FDI %>%
+  filter(!grepl(paste0("^(", paste(Remove_Meta, collapse="|"), ")"), text))
+```
+
+
+```{r}
+#Tokenize the data, remove stop words, remove the phrase "los angeles," and create a dataframe of one word per row
+# Tokenize the data 
+library(dplyr) 
+library(tidytext)
+library(stringr)
+Tokenize_ChinaFDI <- Remove_MetaChina %>%
+  unnest_tokens(word, text)
+
+# Remove stop words
+ChinaFDI_SW <- Tokenize_ChinaFDI %>%
+  anti_join(stop_words, by = "word")
+
+# Remove the phrase "los angeles"
+ChinaFDI_SW <- ChinaFDI_SW %>%
+  filter(!str_detect(word, "los angeles"))  
+```
+
+
+```{r}
+# To create bigrams 
+ChinaFDI_bigrams <- China_FDI %>%
+  unnest_tokens(bigram, text, token="ngrams", n=2)
+
+# Count the frequency of bigrams
+Count_bigram <- ChinaFDI_bigrams %>%
+  count(bigram, sort = TRUE)
+
+# Top 20 most frequent bigrams
+Top20_bigrams <- Count_bigram %>%
+  top_n(20)
+# View the top 20 bigrams
+print(Top20_bigrams)
+```
+
+
+```{r}
+#Create a ggplot chart showing the top 20 bigrams
+library(ggplot2)
+plot <- ggplot(Top20_bigrams, aes(x = reorder(bigram, n), y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +  
+  labs(title = "Top 20 Bigrams",
+       x = "Bigrams",
+       y = "Frequency") +
+  theme_minimal()
+
+# Display the plot
+print(plot)
+```
+
+```{r}
+#Run a sentiment analysis using the Afinn lexicon
+afinn <- get_sentiments("afinn")
+sentiment_analysis <- Tokenize_ChinaFDI %>%
+  inner_join(afinn, by = "word") %>%
+  group_by(id = row_number()) %>%  
+  summarize(sentiment = sum(value), .groups = "drop")
+sentiment_analysis <- sentiment_analysis %>%
+  mutate(sentiment_type = ifelse(sentiment >= 0, "Positive", "Negative"))
+
+# Visualization
+ggplot(sentiment_analysis, aes(x = id, y = sentiment, fill = sentiment_type)) +
+  geom_col() +
+  scale_fill_manual(values = c("Positive" = "green", "Negative" = "red")) + 
+  labs(title = "Sentiment Analysis Using AFINN Lexicon",
+       x = "Document ID",
+       y = "Sentiment Score") +
+  theme_minimal()
+```
+
+#250 word mwmo
+The articles, numbering 36, were about US-China economy. The dataset lacks some identifiers such as the date of publication, year and the publisher. After tokenization, the bigrams still has some irrelevant words but the key words shows “United States”, and “the Chinese” as top bigrams. 
+The data has a lot of metadata from the source and removing them required some extra effort. I started by going through the main dataset to identify the columns with the useful text. Then I removed all other columns outside the body of the article. This process allowed me to remove all other columns leaving only the articles. This is longer and different from using the “mutate” function. Through this process, I was able to discover a function that removes all email addresses from a dataset.
+There was also a challenge with the packages. I loaded all the packages I needed for analysis at the top, but R shut down at some point. When it came up, I reloaded at the top but they didn’t work. This is why I have some packages attached to different parts of the analysis.
+The exercise provided a good overview of using R for content analysis and has already sparked ideas about the functions I might use for my final project.
+
+
+
+
+
+
+
