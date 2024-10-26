@@ -1,0 +1,95 @@
+---
+title: "Week 9 Assignment Yao_Taofiq"
+author: "Kemi"
+date: "2024-10-22"
+output: html_document
+---
+
+```{r}
+install.packages("pdftools")
+library(tidyverse)
+library(pdftools)
+library(dplyr)
+library(stringr)
+```
+```{r}
+#Import pdf file
+Yao_text <- pdf_text ("C:/Users/kemmy/Documents/GitHub/CompText_Jour/exercises/AI_yao_taufiq.PDF")
+```
+
+
+```{r}
+#Read text from a PDF file
+Yao_text <- pdf_text("C:/Users/kemmy/Documents/GitHub/CompText_Jour/exercises/AI_yao_taufiq.PDF")
+#write to a text file
+writeLines ("Yao_text,~/GitHub/CompText_Jour/exercises/assets/extracted_text/AI_yao_taufiq.txt")
+```
+
+
+```{r}
+#Split the text so you have one article per file
+
+#Split files
+Yao_filepath <- "Yao_text,~/GitHub/CompText_Jour/exercises/assets/extracted_text/AI_yao_taufiq.txt"
+
+#Combine lines into one single string
+Yao_combined <- paste(Yao_text, collapse = "\n")
+
+#Split the text by the "End of Document" phrase
+Yao_split <- strsplit(Yao_combined, "End of Document")[[1]]
+
+#Write each section to a new file
+Yao_output <- "C:/Users/kemmy/Documents/GitHub/CompText_Jour/exercises/assets/extracted_text/"
+for (i in seq_along(Yao_split)) {
+  output_file <- file.path(Yao_output, paste0("yao_extracted_", i, ".txt"))
+  writeLines(Yao_split[[i]], output_file)
+}
+
+cat("Files created:", length(Yao_split), "\n")
+```
+```{r}
+#Construct a dataframe with an index of the articles a unique file name for each article
+#Write each section to a new file and construct the dataframe
+Yao_output <- "C:/Users/kemmy/Documents/GitHub/CompText_Jour/exercises/assets/extracted_text/"
+articles_df <- data.frame(
+  index = integer(),
+  file_name = character(),
+  content = character(),
+  stringsAsFactors = FALSE
+)
+
+for (i in seq_along(Yao_split)) {
+  output_file <- file.path(Yao_output, paste0("yao_extracted_", i, ".txt"))
+  writeLines(Yao_split[[i]], output_file)
+  
+#Append to dataframe
+  articles_df <- rbind(articles_df, data.frame(index = i, file_name = paste0("yao_extracted_", i, ".txt"), content = Yao_split[[i]], stringsAsFactors = FALSE))
+}
+
+#Print the number of files created
+cat("Files created:", length(Yao_split), "\n")
+
+#Display the dataframe
+print(articles_df)
+```
+
+```{r}
+#Pull the text articles together into a single dataframe, one row per sentence
+#Construct the output file path for each article
+  output_file <- file.path(Yao_output, paste0("yao_extracted_", i, ".txt"))
+  
+#Write the content of each article to a new text file
+  writeLines(Yao_split[[i]], output_file)
+  
+#Split the content into sentences using stringr's sentence detection
+  sentences <- unlist(str_split(Yao_split[[i]], "(?<!\\w\\.)\\.\\s+|(?<!\\w\\.)\\!\\s+|(?<!\\w\\.)\\?\\s+"))
+  
+#Print the number of files created
+cat("Files created:", length(Yao_split), "\n")
+
+#Display the dataframe with articles
+print(articles_df)
+```
+
+#Memo
+This exercise was really helpful. The principles applied to my 10 articles also applies here, but this proved more challenging due to the number of articles. Removing unwanted metadata requires sifting through several columns, identifying the metadata, and writing codes to clean them out. I struggled with this part in this exercise, but I hope to gain more guidance on how to address it in class.
