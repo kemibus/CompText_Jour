@@ -154,10 +154,6 @@ create_article_text <- function(row_value) {
     bind_rows(articles_df_temp)
 }
 
-###
-# Create elements needed to run function
-###
-
 # Create empty tibble to store results
 articles_df <- tibble()
 #running once to test
@@ -165,10 +161,7 @@ articles_df <- tibble()
 # Create an array of numbers to loop through, from 1 to the number of rows in our index dataframe 
 row_values <- 1:nrow(final_index)
 
-###
-# Execute function using lapply
-# This loops through each row of the dataframe and append results to master file
-###
+#Execute function using lapply
 
 lapply(row_values, create_article_text)
 
@@ -180,7 +173,7 @@ articles_df <- articles_df %>%
   select(filename, sentence=value) %>%
   inner_join(final_index)
 
-#After viewing articles_df, I see 64 lines from the index that I don't need. Cutting them 
+#After viewing articles_df, I see 158 lines from the index that I don't need. Cutting them 
 
 articles_df <- articles_df %>%
   slice(-c(1:158)) |> 
@@ -193,20 +186,98 @@ articles_df <- articles_df %>%
 
 
 ```{r}
+```{r}
+#load tidyverse, tidytext, rio and quanteda libraries
+library(tidyverse)
+library(rio)
+library(tidytext)
+library(quanteda)
+library(knitr)
+library(dplyr)
 
+```
+#Remove stopwords
+```{r}
+data(stop_words)
+```
+
+```{r}
+bigrams <- articles_df %>%
+  select(sentence) %>%
+  mutate(sentence = str_squish(sentence)) %>%
+  mutate(sentence = tolower(sentence)) %>%
+  mutate(sentence = str_replace_all(sentence, 
+    "title|pages|publication date|publication type|web publication|issn|language of publication: english|publication type|document url|copyright|last updated|database|startofarticle|proquest document id|classification|https|--|people|publication info|illustration|caption|[0-9.]|identifier /keyword|twitter\\|About LexisNexis|erms & Conditions|Copyright|2020 LexisNexis|Loose Ends|Power Line|All Rights Reserved|Length|Dateline|Byline|Series Title|Author Note|https|wwwalt|Author\\.", 
+    "")) %>%
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>%
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ", extra = "merge", fill = "right") %>%
+  filter(!is.na(word1) & !is.na(word2)) %>%
+  filter(!word1 %in% stop_words$word, !word2 %in% stop_words$word) %>%
+  count(word1, word2, sort = TRUE)
 ```
 
 
 ```{r}
+# This is a different method of removing the metadata that i tried but still couldn't get them off the dataset.
+# Define patterns to remove unwanted metadata
+metadata_patterns <- paste(
+  "title|pages|publication date|publication type|web publication|issn",
+  "language of publication: english|document url|copyright|last updated|database",
+  "startofarticle|proquest document id|classification|https|--|people|publication info",
+  "illustration|caption|[0-9]+|identifier /keyword|erms & Conditions|Copyright",
+  "All Rights Reserved|Length|Dateline|Byline|Series Title|Author Note",
+  "Author\\.|https|wwwalt",
+  sep = "|"
+)
 
+# Process bigrams
+bigrams <- articles_df %>%
+  select(sentence) %>%
+  mutate(sentence = str_squish(sentence)) %>%
+  mutate(sentence = tolower(sentence)) %>%
+  mutate(sentence = str_remove_all(sentence, metadata_patterns)) %>%
+  mutate(sentence = str_replace_all(sentence, "- ", "")) %>%
+  unnest_tokens(bigram, sentence, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ", extra = "merge", fill = "right") %>%
+  filter(!is.na(word1) & !is.na(word2)) %>%
+  filter(!word1 %in% stop_words$word, !word2 %in% stop_words$word) %>%
+  count(word1, word2, sort = TRUE)
 ```
 
 
 ```{r}
+# top_20_bigrams
+top_20_bigrams <- bigrams %>% 
+   slice_max(n, n = 20) %>% 
+   mutate(bigram = paste(word1, " ", word2)) %>% 
+   select(bigram, n)
+
+top_20_bigrams
 
 ```
 
+```{r}
+ggplot(top_20_bigrams, aes(x = reorder(bigram, n), y = n, fill=n)) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none") +
+  coord_flip() +  
+  labs(title = "Moley Articles",
+       caption = "n=33 articles. Graphic by Kemi Busari 13-05-2024",
+       x = "Bigrams",
+       y = "Count of terms")
+```
+
+
 
 ```{r}
+#memo
+•	The dataframe, after applying the articles_df function, emerged in 4563 columns and 14 rows. The columns included sentences from each dataframe while the rows have identifier information such as filename, path and other information to trace and identify the sentences.
+•	After indexing, a peep into the dataset shows that lines 1 to 158 are blank rows and full of unwanted metadata. This was cleaned out before the articles were written into csv files.
+•	The write.csv function returned 32 distinct articles disaggregated to 6529 rows.
+•	The unnest token, filter and count functions combined to give me 7424 bigrams.
+•	The top 3 bigrams are: “gold standard” with 46 entries “white house” with 46 and “Raymond Moley” with 40. This suggests a prominence of conversation around politics, economy and the main Raymond Moley, being the main actor in the articles.
+•	The major challenge came in trying to strip the dataset of unwanted metadata.  I took the time to identify all phrases that need to be removed from the dataset but the “mutate” function doesn’t seem to work for me, even after trying with another method. This impacted my findings in the next steps but I’m confident of my understanding the process, regardless. Going through this process again gives me a better confidence of being able to handle the cleaning of my own data. The process of creating a filepath not wired to my computer now comes more easily as well as the process of creating folders for specific projects and assigning the folder as working directory.
+
 
 ```

@@ -57,7 +57,7 @@ cat("Files created:", length(documents), "\n")
 ## Create an index from the first extracted page
 --We are just grabbing the index of the 10 listed items and creating a dataframe
 ```{r}
-kemi_index <- read_lines("../exercises/assets/extracted_text/kemi_extracted_1.txt")
+kemi_index <- read_lines("~/GitHub/CompText_Jour/Week_10_assignment/Week _10_extracted")
 # Extract lines 16 to 58
 extracted_lines <- kemi_index[16:58]
 
